@@ -12,13 +12,10 @@ mod pages;
 mod themes;
 mod utils;
 
-use std::fmt::Debug;
 
 use config::Config;
-use console_error_panic_hook;
 use leptos::*;
 use leptos_router::*;
-use num_format::Format;
 pub use themes::*;
 
 use crate::{
