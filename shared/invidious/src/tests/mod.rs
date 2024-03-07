@@ -18,7 +18,9 @@ mod tests {
     const TEST_CHANNEL: &'static str = "UC7YOGHUfC1Tb6E4pudI9STA";
     const TEST_VIDEO_COMMENTS: &'static str = "sjC9rxq0LMc";
     const TEST_PLAYLIST: &'static str = "PLMogWd-g0jAM34EC316Y7UT9-xp_mcAke";
-    const TEST_REGION: CountryCode = CountryCode::IE;
+    const TEST_REGION: &'static str = "IE";
+    const TEST_LANG: &'static str = "en-US";
+
 
     wasm_bindgen_test_configure!(run_in_browser);
 
@@ -34,7 +36,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     async fn get_video() {
-        let video = Video::fetch_video(TEST_SERVER, TEST_VIDEO).await.unwrap();
+        let video = Video::fetch_video(TEST_SERVER, TEST_VIDEO, TEST_LANG).await.unwrap();
     }
 
     #[wasm_bindgen_test]
@@ -102,21 +104,21 @@ mod tests {
 
     #[wasm_bindgen_test]
     async fn get_trending() {
-        Trending::fetch_trending(TEST_SERVER, Default, TEST_REGION).await.unwrap();
-        Trending::fetch_trending(TEST_SERVER, Music, TEST_REGION).await.unwrap();
-        Trending::fetch_trending(TEST_SERVER, Gaming, TEST_REGION).await.unwrap();
-        Trending::fetch_trending(TEST_SERVER, Movies, TEST_REGION).await.unwrap();
+        Trending::fetch_trending(TEST_SERVER, Default, TEST_REGION, TEST_LANG).await.unwrap();
+        Trending::fetch_trending(TEST_SERVER, Music, TEST_REGION, TEST_LANG).await.unwrap();
+        Trending::fetch_trending(TEST_SERVER, Gaming, TEST_REGION, TEST_LANG).await.unwrap();
+        Trending::fetch_trending(TEST_SERVER, Movies, TEST_REGION, TEST_LANG).await.unwrap();
     }
 
     #[wasm_bindgen_test]
     async fn get_popular() {
-        Popular::fetch_popular(TEST_SERVER).await.unwrap();
+        Popular::fetch_popular(TEST_SERVER, TEST_LANG).await.unwrap();
     }
 
     #[wasm_bindgen_test]
     async fn search() {
         let args = SearchArgs::from_str("test".to_string());
-        let search = SearchResults::fetch_search_results(TEST_SERVER, args, 1).await.unwrap();
+        let search = SearchResults::fetch_search_results(TEST_SERVER, args, 1, TEST_LANG).await.unwrap();
         assert_ne!(0, search.items.len());
 
         // Search::search(TEST_SERVER, &args).await.unwrap();
@@ -132,7 +134,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     async fn get_channel() {
-        let channel = Channel::fetch_channel(TEST_SERVER, TEST_CHANNEL).await.unwrap();
+        let channel = Channel::fetch_channel(TEST_SERVER, TEST_CHANNEL, TEST_LANG).await.unwrap();
 
         let local_json = include_str!("./files/channel.json");
         let local: Channel = serde_json::from_str(local_json).unwrap();
@@ -142,7 +144,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     async fn get_comments() {
-        let comments = Comments::fetch_comments(TEST_SERVER, TEST_VIDEO_COMMENTS, None).await.unwrap();
+        let comments = Comments::fetch_comments(TEST_SERVER, TEST_VIDEO_COMMENTS, None, TEST_LANG).await.unwrap();
 
         let local_json = include_str!("./files/comments.json");
         let local: Comments = serde_json::from_str(local_json).unwrap();
@@ -150,11 +152,11 @@ mod tests {
 
     #[wasm_bindgen_test]
     async fn get_comment_replies() {
-        let comments = Comments::fetch_comments(TEST_SERVER, TEST_VIDEO_COMMENTS, None).await.unwrap();
+        let comments = Comments::fetch_comments(TEST_SERVER, TEST_VIDEO_COMMENTS, None, TEST_LANG).await.unwrap();
 
         let first_comment = comments.comments.first().unwrap();
         let first_comment_replies_info = first_comment.replies_info.clone().unwrap();
-        let replies = Replies::fetch_replies(&first_comment_replies_info.continuation, TEST_SERVER, &first_comment.id).await.unwrap();
+        let replies = Replies::fetch_replies(&first_comment_replies_info.continuation, TEST_SERVER, &first_comment.id, TEST_LANG).await.unwrap();
 
         assert_eq!(replies.comments.len(), 10);
     }
@@ -225,7 +227,7 @@ mod tests {
         let yt_subs: YoutubeSubscriptions =
             YoutubeSubscriptions::read_subs_from_csv(subs_json).unwrap();
         let subs: Subscriptions = yt_subs.into();
-        let subs_videos = subs.fetch_videos(TEST_SERVER, false).await.unwrap();
+        let subs_videos = subs.fetch_videos(TEST_SERVER, false, TEST_LANG).await.unwrap();
 
         subs_videos
             .into_iter()
@@ -248,7 +250,7 @@ mod tests {
             YoutubeSubscriptions::read_subs_from_csv(subs_json).unwrap();
         let subs: Subscriptions = yt_subs.into();
 
-        let subs_videos = subs.fetch_videos(TEST_SERVER, true).await.unwrap();
+        let subs_videos = subs.fetch_videos(TEST_SERVER, true, TEST_LANG).await.unwrap();
         subs_videos
             .into_iter()
             .for_each(|sub_videos| match sub_videos {
